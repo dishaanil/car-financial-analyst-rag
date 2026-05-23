@@ -1,0 +1,21 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Secrets — never bake into the image
+.env
+
+# Raw PDFs — ChromaDB is already built; PDFs are not needed at runtime
+../Data/
+Data/
+
+# Git
+.git/
+.gitignore
+
+# Local dev artifacts
+*.log
+.DS_Store

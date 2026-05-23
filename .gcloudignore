@@ -1,0 +1,12 @@
+# Rules for what gcloud builds submit sends to Cloud Build.
+# Inherits .gitignore rules, then overrides below.
+#!include:.gitignore
+
+# chroma_db is in .gitignore but MUST be in the build context
+# so the Dockerfile can COPY it into the image.
+!chroma_db/
+
+# Also exclude large local-only dirs that aren't needed for the build
+.venv/
+../Data/
+Data/
