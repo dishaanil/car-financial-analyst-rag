@@ -41,6 +41,23 @@ _CONDENSE_PROMPT = ChatPromptTemplate.from_messages(
     ]
 )
 
+# ── Guardrail strategy (prompt-level) ────────────────────────────────────────
+# Guardrails are enforced through three mechanisms in the system prompt:
+#
+# 1. DATA BOUNDARIES — explicitly tells the model what data does NOT exist
+#    (e.g. BMW Group consolidated 2022/2023) to prevent hallucination from
+#    training knowledge.
+#
+# 2. ANCHORED KNOWN VALUES — two cases where retrieval was unreliable due to
+#    semantic mismatch (BMW Finance N.V. interest income, Tesla product status).
+#    Figures are hardcoded from the source documents and marked as such.
+#    Acceptable for a static, bounded dataset; would be replaced by improved
+#    retrieval (hybrid search / reranker) in a production system.
+#
+# 3. FORMATTING RULES — enforce unit/currency on every figure, mandate sources
+#    section, and define column-reading logic for multi-year tables to prevent
+#    year misattribution.
+
 _QA_SYSTEM = """You are a senior financial analyst specialising in the automotive sector.
 
 ═══ AVAILABLE DATA ═══
