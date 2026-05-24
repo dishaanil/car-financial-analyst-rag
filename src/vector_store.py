@@ -54,10 +54,25 @@ def _build_filter(companies: List[str], years: List[str]) -> Optional[dict]:
     return company_filter or year_filter or None
 
 
+_ALL_COMPANY_PHRASES = (
+    "all three", "all companies", "all three companies",
+    "each company", "each of the", "all of the companies",
+    "three companies", "every company",
+)
+
+
 def extract_query_entities(query: str):
-    """Simple NER: detect known company names and 4-digit years in the query."""
+    """
+    Simple NER: detect known company names and 4-digit years in the query.
+
+    Special case: phrases like "all three companies" or "each company" are
+    treated as naming all companies so the multi-company retrieval path fires.
+    """
     q_lower = query.lower()
     companies = [c for c in COMPANIES if c.lower() in q_lower]
+    # "all three" / "all companies" / "each company" → include every company
+    if not companies and any(p in q_lower for p in _ALL_COMPANY_PHRASES):
+        companies = list(COMPANIES)
     years = [str(y) for y in range(2010, 2030) if str(y) in query]
     return companies, years
 
@@ -188,6 +203,20 @@ class SmartFinancialRetriever:
                     if d.page_content not in seen:
                         seen.add(d.page_content)
                         docs.append(d)
+
+                # Sub-query 3: targeted search for the most recent requested year only —
+                # ensures the latest year is not crowded out by earlier years' chunks.
+                if query_years:
+                    latest_year = max(query_years)
+                    latest_filter = _build_filter(companies, [latest_year])
+                    latest_sub = (
+                        f"{' '.join(companies)} {latest_year} "
+                        "total revenues income statement annual report"
+                    )
+                    for d in self.vectorstore.similarity_search(latest_sub, k=2, filter=latest_filter):
+                        if d.page_content not in seen:
+                            seen.add(d.page_content)
+                            docs.append(d)
             return docs
 
         # ── Strategy 3: No entities — full corpus search ──────────────────────
