@@ -25,7 +25,6 @@ SESSION_ID = "streamlit"
 
 st.set_page_config(
     page_title="Car Financial RAG",
-    page_icon="📊",
     layout="centered",
 )
 
@@ -46,13 +45,13 @@ chain, clear_history = load_chain()
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 
 with st.sidebar:
-    st.title("📊 Car Financial RAG")
+    st.title("Car Financial RAG")
     st.caption("Automotive Sector Annual Report Analyst")
     st.markdown("**Coverage**")
     st.markdown(
-        "- 🚗 **BMW** — 2021 Group report + 2022/2023 BMW Finance N.V.\n"
-        "- 🚙 **Ford** — 2021, 2022, 2023\n"
-        "- ⚡ **Tesla** — 2022, 2023"
+        "- **BMW** — 2021 Group report + 2022/2023 BMW Finance N.V.\n"
+        "- **Ford** — 2021, 2022, 2023\n"
+        "- **Tesla** — 2022, 2023"
     )
     st.divider()
     st.markdown("**Example questions**")
@@ -64,7 +63,7 @@ with st.sidebar:
         "- Which Tesla products are in development?"
     )
     st.divider()
-    if st.button("🗑️ Clear conversation", use_container_width=True):
+    if st.button("Clear conversation", use_container_width=True):
         clear_history(SESSION_ID)
         st.session_state.messages = []
         st.rerun()
