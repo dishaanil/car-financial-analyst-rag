@@ -77,6 +77,11 @@ def detect_currency(text: str) -> str:
 def parse_table_for_chart(answer: str) -> dict | None:
     """
     Parse the first markdown table in the answer and extract chart data.
+
+    - Multiple numeric columns (e.g. 2021/2022/2023 revenue across companies)
+      → grouped bar chart: first column = row labels, each numeric column = one series.
+    - Single numeric column with year labels → line chart.
+    - Single numeric column otherwise → bar chart.
     Returns None if no table found or fewer than 2 plottable data points.
     """
     table_re = re.compile(
@@ -102,18 +107,37 @@ def parse_table_for_chart(answer: str) -> dict | None:
     if not rows or not headers:
         return None
 
-    # Find the rightmost column that contains numeric values
-    numeric_col = None
-    for col_idx in range(len(headers) - 1, -1, -1):
+    # Identify which columns (index >= 1) contain at least one numeric value
+    numeric_cols = [
+        col_idx for col_idx in range(1, len(headers))
         if any(extract_number(row[col_idx]) is not None
-               for row in rows if col_idx < len(row)):
-            numeric_col = col_idx
-            break
+               for row in rows if col_idx < len(row))
+    ]
 
-    if numeric_col is None:
+    if not numeric_cols:
         return None
 
-    # Build label-value pairs — skip "Not available" rows
+    # ── Multi-column → grouped bar ────────────────────────────────────────────
+    if len(numeric_cols) > 1:
+        row_labels = [row[0] for row in rows if row]
+        series = []
+        for col_idx in numeric_cols:
+            col_name = headers[col_idx] if col_idx < len(headers) else str(col_idx)
+            values = [
+                extract_number(row[col_idx]) if col_idx < len(row) else None
+                for row in rows
+            ]
+            # Only include the series if it has at least one real value
+            if any(v is not None for v in values):
+                series.append({'name': col_name, 'values': values})
+
+        if len(series) < 2 or len(row_labels) < 1:
+            return None
+
+        return {'type': 'grouped_bar', 'labels': row_labels, 'series': series}
+
+    # ── Single numeric column → bar or line ───────────────────────────────────
+    numeric_col = numeric_cols[0]
     labels, values, currencies = [], [], []
     for row in rows:
         if numeric_col >= len(row):
@@ -121,31 +145,20 @@ def parse_table_for_chart(answer: str) -> dict | None:
         val = extract_number(row[numeric_col])
         if val is None:
             continue
-        label = ' '.join(row[i] for i in range(numeric_col) if i < len(row)).strip()
-        labels.append(label)
+        labels.append(row[0])
         values.append(val)
         currencies.append(detect_currency(row[numeric_col]))
 
     if len(labels) < 2:
         return None
 
-    # Line chart if all labels are 4-digit years, bar otherwise
     chart_type = 'line' if all(re.match(r'^\d{4}$', l.strip()) for l in labels) else 'bar'
-
-    # Unit label from the value column header
     unit = headers[numeric_col] if numeric_col < len(headers) else ''
-    # Prepend the most common currency symbol if not already in unit header
     dominant_currency = max(set(currencies), key=currencies.count) if currencies else ''
     if dominant_currency and dominant_currency not in unit:
         unit = f"{dominant_currency}{unit}"
 
-    return {
-        'type': chart_type,
-        'title': unit,
-        'labels': labels,
-        'values': values,
-        'unit': unit,
-    }
+    return {'type': chart_type, 'title': unit, 'labels': labels, 'values': values, 'unit': unit}
 
 
 def render_chart(chart_data: dict):
@@ -153,30 +166,47 @@ def render_chart(chart_data: dict):
     try:
         import plotly.graph_objects as go
 
-        labels = chart_data['labels']
-        values = chart_data['values']
-        unit   = chart_data['unit']
+        COLOURS = ['#4C78A8', '#F58518', '#54A24B', '#E45756', '#B279A2']
 
-        if chart_data['type'] == 'line':
+        if chart_data['type'] == 'grouped_bar':
+            fig = go.Figure()
+            for i, s in enumerate(chart_data['series']):
+                fig.add_trace(go.Bar(
+                    name=s['name'],
+                    x=chart_data['labels'],
+                    y=s['values'],
+                    marker_color=COLOURS[i % len(COLOURS)],
+                ))
+            fig.update_layout(barmode='group')
+
+        elif chart_data['type'] == 'line':
             fig = go.Figure(go.Scatter(
-                x=labels, y=values,
+                x=chart_data['labels'], y=chart_data['values'],
                 mode='lines+markers',
-                line=dict(color='#4C78A8', width=2),
+                line=dict(color=COLOURS[0], width=2),
                 marker=dict(size=7),
             ))
+
         elif chart_data['type'] == 'pie':
-            fig = go.Figure(go.Pie(labels=labels, values=values, hole=0.3))
-        else:
-            fig = go.Figure(go.Bar(x=labels, y=values, marker_color='#4C78A8'))
+            fig = go.Figure(go.Pie(
+                labels=chart_data['labels'], values=chart_data['values'], hole=0.3
+            ))
+
+        else:  # single bar
+            fig = go.Figure(go.Bar(
+                x=chart_data['labels'], y=chart_data['values'],
+                marker_color=COLOURS[0],
+            ))
 
         fig.update_layout(
             title=chart_data.get('title', ''),
-            yaxis_title=unit,
+            yaxis_title=chart_data.get('unit', ''),
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
             font=dict(color='#FAFAFA'),
-            margin=dict(t=50, b=40, l=40, r=20),
-            height=380,
+            legend=dict(orientation='h', y=1.1),
+            margin=dict(t=60, b=40, l=40, r=20),
+            height=400,
         )
 
         st.plotly_chart(fig, use_container_width=True)
