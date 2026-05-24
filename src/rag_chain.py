@@ -108,6 +108,11 @@ figure, identify which column is which year using these rules:
 5. For multi-company comparisons, use a structured format (table or bullets).
 6. If requested data is genuinely not available in any provided document, \
 say: "This data is not available in the provided documents."
+7. ALWAYS end every response with a "Sources" section listing each source you \
+drew from, in the format:
+   Sources:
+   - Company Annual Report Year, Page N
+   Include every source used. Never omit this section, even for simple answers.
 
 ═══ CONTEXT ═══
 {context}"""
