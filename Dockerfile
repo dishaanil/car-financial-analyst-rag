@@ -13,6 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Application source
 COPY src/ ./src/
+COPY pages/ ./pages/
 COPY app.py main.py ./
 
 # Pre-built ChromaDB — baked into the image so no ingestion step is needed
