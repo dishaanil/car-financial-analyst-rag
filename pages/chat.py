@@ -55,10 +55,21 @@ def split_sources(answer: str) -> tuple[str, str | None]:
 
 
 def extract_number(text: str) -> float | None:
-    """Extract a numeric value from text like '$136,341 million' or '€111,239M'."""
+    """
+    Extract a numeric value normalised to millions.
+    '$136,341 million' → 136341.0
+    '€1,965,292 thousand' → 1965.292  (÷1000 to convert to millions)
+    '€142.4 billion' → 142400.0       (×1000 to convert to millions)
+    """
     if re.search(r'not available|n/a', text, re.IGNORECASE):
         return None
-    multiplier = 1000 if 'billion' in text.lower() else 1
+    t = text.lower()
+    if 'billion' in t:
+        multiplier = 1000        # billions → millions
+    elif 'thousand' in t:
+        multiplier = 0.001       # thousands → millions
+    else:
+        multiplier = 1           # already in millions
     nums = re.findall(r'[\d]+(?:,[\d]{3})*(?:\.\d+)?', text)
     if nums:
         return float(nums[0].replace(',', '')) * multiplier
