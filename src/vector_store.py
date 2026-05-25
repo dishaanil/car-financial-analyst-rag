@@ -185,7 +185,7 @@ class SmartFinancialRetriever:
                         seen.add(d.page_content)
                         docs.append(d)
             elif _is_revenue_query(query):
-                # Sub-query 1: income-statement style — catches "total revenues" / "interest income"
+                # Sub-query 1: income-statement style - catches "total revenues" / "interest income"
                 sub1 = (
                     f"{' '.join(companies)} {' '.join(query_years)} "
                     "total revenues group revenues interest income consolidated"
@@ -194,7 +194,7 @@ class SmartFinancialRetriever:
                     if d.page_content not in seen:
                         seen.add(d.page_content)
                         docs.append(d)
-                # Sub-query 2: key-metrics style — catches summary tables ("Revenue ($M) ... Cash Flows")
+                # Sub-query 2: key-metrics style - catches summary tables ("Revenue ($M) ... Cash Flows")
                 sub2 = (
                     f"{' '.join(companies)} {' '.join(query_years)} "
                     "revenue net income millions cash flows operating activities compared prior year"
@@ -204,7 +204,7 @@ class SmartFinancialRetriever:
                         seen.add(d.page_content)
                         docs.append(d)
 
-                # Sub-query 3: targeted search for the most recent requested year only —
+                # Sub-query 3: targeted search for the most recent requested year only -
                 # ensures the latest year is not crowded out by earlier years' chunks.
                 if query_years:
                     latest_year = max(query_years)
@@ -219,7 +219,7 @@ class SmartFinancialRetriever:
                             docs.append(d)
             return docs
 
-        # ── Strategy 3: No entities — full corpus search ──────────────────────
+        # ── Strategy 3: No entities - full corpus search ──────────────────────
         return self.vectorstore.similarity_search(query, k=self.k)
 
     def _multi_company_retrieve(
@@ -227,8 +227,8 @@ class SmartFinancialRetriever:
     ) -> List[Document]:
         """
         For each (company, year) pair: run TWO searches and take the union.
-          1. The original user query  — broad semantic match.
-          2. A revenue-targeted query — ensures income-statement chunks surface.
+          1. The original user query  - broad semantic match.
+          2. A revenue-targeted query - ensures income-statement chunks surface.
         This prevents high-traffic pages (MD&A narrative) from crowding out the
         summary financial tables that contain the actual top-line revenue figures.
         """
@@ -242,13 +242,13 @@ class SmartFinancialRetriever:
             for year in target_years:
                 f = _build_filter([company], [year])
 
-                # Query 1: original user query — broad semantic match
+                # Query 1: original user query - broad semantic match
                 for d in self.vectorstore.similarity_search(query, k=2, filter=f):
                     if d.page_content not in seen_ids:
                         seen_ids.add(d.page_content)
                         docs.append(d)
 
-                # Query 2: income-statement targeted — catches formal financial statement tables
+                # Query 2: income-statement targeted - catches formal financial statement tables
                 # BMW Finance N.V. uses "interest income" as revenue; BMW Group uses "revenues"
                 targeted = f"{company} {year} total revenues group revenues interest income net income"
                 for d in self.vectorstore.similarity_search(targeted, k=2, filter=f):
@@ -256,7 +256,7 @@ class SmartFinancialRetriever:
                         seen_ids.add(d.page_content)
                         docs.append(d)
 
-                # Query 3: key-metrics text — retrieves the prose chunk that contains
+                # Query 3: key-metrics text - retrieves the prose chunk that contains
                 # explicit year column labels (e.g. "2020 2021 H/(L)"), letting the LLM
                 # resolve which column maps to which year in adjacent table chunks.
                 header_q = f"{company} {year} GAAP financial measures company key metrics revenue cash flows compared"

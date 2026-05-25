@@ -5,10 +5,10 @@ __pycache__/
 *.pyo
 .pytest_cache/
 
-# Secrets — never bake into the image
+# Secrets - never bake into the image
 .env
 
-# Raw PDFs — ChromaDB is already built; PDFs are not needed at runtime
+# Raw PDFs - ChromaDB is already built; PDFs are not needed at runtime
 ../Data/
 Data/
 

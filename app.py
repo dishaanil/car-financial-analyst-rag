@@ -1,5 +1,5 @@
 """
-Car Financial RAG — Streamlit entry point.
+Car Financial RAG - Streamlit entry point.
 """
 
 import os

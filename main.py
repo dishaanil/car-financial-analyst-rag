@@ -1,5 +1,5 @@
 """
-Car Financial RAG — CLI entry point.
+Car Financial RAG - CLI entry point.
 
 Usage:
     python main.py            # interactive chat (ingests on first run)
@@ -41,8 +41,8 @@ BANNER = """
 [dim]BMW · Ford · Tesla  |  2021–2023[/dim]
 
 [italic]Type your question, or:[/italic]
-  [bold]/clear[/bold]  — reset conversation history
-  [bold]/quit[/bold]   — exit
+  [bold]/clear[/bold]  - reset conversation history
+  [bold]/quit[/bold]   - exit
 """
 
 
@@ -53,7 +53,7 @@ def ingest(force: bool = False):
     from src.vector_store import ingest_documents, is_already_ingested
 
     if not force and is_already_ingested(CHROMA_DB_PATH):
-        console.print("[dim]Vector store already populated — skipping ingestion.[/dim]")
+        console.print("[dim]Vector store already populated - skipping ingestion.[/dim]")
         console.print("[dim]Run with --ingest to force a rebuild.[/dim]\n")
         return
 

@@ -2,7 +2,7 @@
 PDF document processor with pdfplumber for accurate table extraction.
 
 Key insight from FinQA (Chen et al., 2021): financial tables need to be
-kept intact as semantic units — naive text splitting destroys table structure
+kept intact as semantic units - naive text splitting destroys table structure
 and makes numerical reasoning impossible.
 """
 

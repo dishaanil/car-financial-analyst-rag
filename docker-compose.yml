@@ -9,7 +9,7 @@ services:
       - LANGCHAIN_TRACING_V2=${LANGCHAIN_TRACING_V2:-false}
       - LANGCHAIN_PROJECT=${LANGCHAIN_PROJECT:-car-financial-rag}
       - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
-    # ChromaDB is baked into the image — no volume needed.
+    # ChromaDB is baked into the image - no volume needed.
     # Remove the comment below to mount a local chroma_db instead
     # (useful if you rebuilt embeddings locally and don't want to rebuild the image):
     # volumes:

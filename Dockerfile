@@ -16,7 +16,7 @@ COPY src/ ./src/
 COPY pages/ ./pages/
 COPY app.py main.py ./
 
-# Pre-built ChromaDB — baked into the image so no ingestion step is needed
+# Pre-built ChromaDB - baked into the image so no ingestion step is needed
 # at runtime. The DB is read-only; rebuild the image to update embeddings.
 COPY chroma_db/ ./chroma_db/
 

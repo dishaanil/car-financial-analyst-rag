@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# deploy.sh — Build and deploy Car Financial RAG to GCP Cloud Run
+# deploy.sh - Build and deploy Car Financial RAG to GCP Cloud Run
 #
 # Prerequisites:
 #   1. gcloud CLI installed and authenticated  (gcloud auth login)
@@ -41,20 +41,20 @@ gcloud artifacts repositories create "$REPO_NAME" \
   --location "$REGION" \
   --project "$PROJECT_ID" 2>/dev/null \
   && echo "Repository created." \
-  || echo "Repository already exists — continuing."
+  || echo "Repository already exists - continuing."
 
 # Configure Docker to push to Artifact Registry
 gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
 
 # ── Step 3: Store API keys in Secret Manager (run once) ──────────────────────
 echo "── Step 3/5: Storing secrets in Secret Manager ──────────────────────────"
-echo "   (Skipping if secrets already exist — update manually if needed)"
+echo "   (Skipping if secrets already exist - update manually if needed)"
 
 store_secret() {
   local name=$1
   local prompt=$2
   if gcloud secrets describe "$name" --project "$PROJECT_ID" &>/dev/null; then
-    echo "   Secret '$name' already exists — skipping."
+    echo "   Secret '$name' already exists - skipping."
   else
     echo -n "   Enter value for $prompt: "
     read -rs value
@@ -90,7 +90,7 @@ gcloud run deploy "$SERVICE_NAME" \
   --timeout 300 \
   --port 8080 \
   --set-secrets "OPENAI_API_KEY=OPENAI_API_KEY:latest,LANGCHAIN_API_KEY=LANGCHAIN_API_KEY:latest" \
-  --set-env-vars "LANGCHAIN_TRACING_V2=true,LANGCHAIN_PROJECT=car-financial-rag,OPENAI_MODEL=gpt-4o-mini" \
+  --set-env-vars "LANGCHAIN_TRACING_V2=true,LANGCHAIN_PROJECT=car-financial-rag,OPENAI_MODEL=gpt-4o" \
   --project "$PROJECT_ID"
 
 # ── Done ──────────────────────────────────────────────────────────────────────

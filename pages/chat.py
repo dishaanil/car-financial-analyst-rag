@@ -231,9 +231,9 @@ def render_answer(answer: str):
 with st.sidebar:
     st.markdown("**Coverage**")
     st.markdown(
-        "- **BMW** — 2021, 2022, 2023\n"
-        "- **Ford** — 2021, 2022, 2023\n"
-        "- **Tesla** — 2022, 2023"
+        "- **BMW** - 2021, 2022, 2023\n"
+        "- **Ford** - 2021, 2022, 2023\n"
+        "- **Tesla** - 2022, 2023"
     )
     st.divider()
     if st.button("Clear conversation", use_container_width=True):
