@@ -12,7 +12,7 @@ After cloning, add a `Data/` folder with your PDF annual reports before running 
 
 ```
 car-financial-rag/
-├── Data/                        ← create this manually (not in repo)
+├── Data/
 │   ├── BMW_2021.pdf
 │   ├── BMW_2022.pdf
 │   ├── BMW_2023.pdf
