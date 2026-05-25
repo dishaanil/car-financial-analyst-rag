@@ -2,6 +2,8 @@
 
 A Retrieval-Augmented Generation (RAG) chatbot for automotive sector annual reports (BMW, Ford, Tesla).
 
+**Live demo: [https://car-financial-rag-158284631383.us-central1.run.app](https://car-financial-rag-158284631383.us-central1.run.app)**
+
 ## Architecture
 
 ![Architecture Diagram](architecture.png)
